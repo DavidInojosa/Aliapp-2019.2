@@ -54,9 +54,7 @@ class _MapState extends State<Map> {
           )
       )
     );
-
   }
-
 _carregarmarcadores(){
   
   Set<Marker> marcadoresLocal = {};
@@ -85,10 +83,10 @@ _carregarmarcadores(){
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Mapa da Alicerce"),),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
         child: Icon(
-          Icons.done_all),
+          Icons.gps_fixed),
           onPressed: _movimentarCamera,
       ),
       body: Container(
@@ -104,9 +102,7 @@ _carregarmarcadores(){
             },
             markers: _marcadores,
         ),
-      )
-
-      
+      ) 
     );
   }
 }
