@@ -1,45 +1,31 @@
+import 'package:aulas/core.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:async';
 import 'dart:convert';
 
 
-class Map extends StatefulWidget {
+class Mapa extends StatefulWidget {
   @override
-  _MapState createState() => _MapState();
+  _MapaState createState() => _MapaState();
 }
 
-class Server {
-  static String serverUrl = "http://192.168.0.17:5000"; // "192.168.42.176"
-  static set serverAddr(String addr) => serverUrl = "http://"+addr+":5000/";
-  
-  static Future<bool> testActive() async {
-    try {
-      var future = await http.get(serverUrl);
-      if (future.statusCode == 200)
-        return true;
-      return false;
-    } catch (err) {
-      return false;
-    }
-  }
-  
-}
+class _MapaState extends State<Mapa> {
+
   //Future<List<Map<String, dynamic>>> 
-    Future<void> _servidorProMapa() async {
-      http.Response request;
-      request = await http.get("${Server.serverUrl}/maps");
-      print(request.body);
-    }
-
-
-class _MapState extends State<Map> {
+  Future<void> _servidorProMapa() async {
+    Future<http.Response> request;
+    request = http.get("${Server.serverUrl}maps");
+    request.catchError((err) => (print(err)));
+    var data = await request;
+    print(data.body);
+  }
 
   Completer<GoogleMapController> _controller = Completer();
   Set<Marker> _marcadores = {};
 
-  _movimentarCamera() async{
+  _movimentarCamera() async {
 
     _controller.future;
     GoogleMapController googleMapController = await _controller.future;
@@ -92,8 +78,8 @@ _carregarmarcadores(){
         child: Icon(
           Icons.gps_fixed),
           onPressed: _movimentarCamera,
-          
       ),
+
       body: Container(
         child: GoogleMap(
           mapType: MapType.normal,
@@ -107,7 +93,8 @@ _carregarmarcadores(){
             },
             markers: _marcadores,
         ),
-      ) 
+      ), 
+      bottomNavigationBar: BottomNavigator(2),
     );
   }
 }
