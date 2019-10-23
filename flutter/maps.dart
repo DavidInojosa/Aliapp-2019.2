@@ -11,7 +11,7 @@ class Map extends StatefulWidget {
 }
 
 class Server {
-  static String serverUrl = "http://192.168.0.17:5000/"; // "192.168.42.176"
+  static String serverUrl = "http://192.168.0.17:5000"; // "192.168.42.176"
   static set serverAddr(String addr) => serverUrl = "http://"+addr+":5000/";
   
   static Future<bool> testActive() async {
@@ -26,14 +26,13 @@ class Server {
   }
   
 }
-
-class ServidorProMapa {
   //Future<List<Map<String, dynamic>>> 
-    Future<void> _ServidorProMapa() async {
-      var request = await http.get("${Server.serverUrl}maps/");
-      print(jsonDecode(request.body));
+    Future<void> _servidorProMapa() async {
+      http.Response request;
+      request = await http.get("${Server.serverUrl}/maps");
+      print(request.body);
     }
-}
+
 
 class _MapState extends State<Map> {
 
@@ -77,17 +76,23 @@ _carregarmarcadores(){
     // TODO: implement initState
     super.initState();
     _carregarmarcadores();
+    _servidorProMapa();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Mapa da Alicerce"),),
+      
+      appBar: AppBar(title: 
+      Text("Mapa da Alicerce", 
+      textAlign: TextAlign.center,),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
         child: Icon(
           Icons.gps_fixed),
           onPressed: _movimentarCamera,
+          
       ),
       body: Container(
         child: GoogleMap(
