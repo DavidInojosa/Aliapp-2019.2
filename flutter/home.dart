@@ -42,7 +42,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
      return Scaffold(
       appBar: AppBar(
-        title: Text('First Route'),
+        title: Text('Página inicial'),
       ),
       bottomNavigationBar: BottomNavigator(1),
       );
