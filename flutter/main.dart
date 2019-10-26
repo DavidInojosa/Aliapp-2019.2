@@ -4,6 +4,7 @@ import 'Maps.dart';
 import 'Home.dart';
 
 void main() { runApp(MaterialApp(
+  debugShowCheckedModeBanner: false,
   title: "alicerce",
   initialRoute: '/',
     routes: {
