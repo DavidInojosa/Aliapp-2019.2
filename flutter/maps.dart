@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'forms.dart';
 
 
 class Mapa extends StatefulWidget {
@@ -67,21 +68,14 @@ _carregarmarcadores(){
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      
+    return Scaffold(      
       appBar: AppBar(title: 
       Text("Mapa da Alicerce", 
       textAlign: TextAlign.center,),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.gps_fixed),
-          onPressed: _movimentarCamera,
-      ),
-
       body: Container(
-        child: GoogleMap(
+        child: Stack(children: <Widget>[
+          GoogleMap(
           mapType: MapType.normal,
           // lat e long da alicerce -> -8.109329, -34.910584
           initialCameraPosition: CameraPosition(
@@ -92,6 +86,47 @@ _carregarmarcadores(){
               _controller.complete(controller);
             },
             markers: _marcadores,
+        ),
+        Positioned(
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(50, 20, 50,20),
+            child: Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.bottomRight,
+            child:FloatingActionButton(
+            heroTag: "adicionar",
+            onPressed:  _movimentarCamera,
+            materialTapTargetSize: MaterialTapTargetSize.padded,
+            backgroundColor: Colors.blue,
+            child: const Icon(Icons.gps_fixed),
+            ),
+          ),
+        Align(
+          alignment: Alignment.bottomLeft,
+          child:
+            FloatingActionButton(
+            heroTag: "tresde",
+            onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MyApp()
+            )
+        ),
+            materialTapTargetSize: MaterialTapTargetSize.padded,
+            backgroundColor: Colors.blue,
+            child: const Icon(Icons.add_location),
+          ),
+        ),
+    ],
+          ),
+          )
+          ,)
+        ],
         ),
       ), 
       bottomNavigationBar: BottomNavigator(2),
