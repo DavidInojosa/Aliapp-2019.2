@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'core.dart';
 import 'Maps.dart';
-import 'Home.dart';
+import 'lista.dart';
+import 'forms.dart';
+import 'placeholders.dart';
 
 void main() { runApp(MaterialApp(
   debugShowCheckedModeBanner: false,
   title: "alicerce",
-  initialRoute: '/',
+  initialRoute: '/server',
     routes: {
-      '/': (context) => ServerInput(),
-      // When navigating to the "/" route, build the FirstScreen widget.
+      '/server': (context) => ServerInput(),
+      '/' : (context) => PlaceholderDia(),
       '/clientes': (context) => CustomerList(),
-      // When navigating to the "/second" route, build the SecondScreen widget.
       '/mapa': (context) => Mapa(),
     },
  ));
