@@ -64,7 +64,7 @@ class CustomerAdd extends StatefulWidget {
 
 class CustomerAddState extends State<CustomerAdd> {
   final _formKey = GlobalKey<FormState>();
-  final _formContent = Cliente();
+  final _formContent = null;
 
   @override
   Widget build(BuildContext context) =>
@@ -72,11 +72,16 @@ class CustomerAddState extends State<CustomerAdd> {
         appBar: AppBar(
           title: Text("Adicionar Cliente"),
         ),
-        body: Form(
+        body: Container(
+            padding:
+                const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            child: Builder(
+                builder: (context) =>Form(
             key: _formKey,
             child: Column(
               children: <Widget>[TextFormField(
-                decoration: InputDecoration(labelText: "Nome"),
+                decoration: InputDecoration(labelText: "Nome",
+                contentPadding: EdgeInsets.all(10),),
                 validator: (value) {
                   if (value.isEmpty)
                     return "Insira um nome";
@@ -86,7 +91,9 @@ class CustomerAddState extends State<CustomerAdd> {
                  onSaved: (String nome) => _formContent.nome = nome,
               ),
                 TextFormField(
-                  decoration: InputDecoration(labelText: "Telefone"),
+                  decoration: InputDecoration(labelText: "Telefone",
+                  contentPadding: EdgeInsets.all(10)
+                  ),
                   keyboardType: TextInputType.phone,
                   validator: (value) {
                     if (value.contains(new RegExp(r"[a..zA..Z]")))
@@ -97,7 +104,9 @@ class CustomerAddState extends State<CustomerAdd> {
                   onSaved: (String fone ) => _formContent.fone = fone,
                 ),
                 TextFormField(
-                  decoration: InputDecoration(labelText: "Email"),
+                  decoration: InputDecoration(labelText: "Email",
+                  contentPadding: EdgeInsets.all(10)
+                  ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if ( !(value.contains("@") && value.contains(".")) )
@@ -115,10 +124,14 @@ class CustomerAddState extends State<CustomerAdd> {
                   _formKey.currentState.save();
                 }
               },
-            ),
+              child: Text('Adicionar'),
+              textColor: Colors.white,
+              color: Theme.of(context).accentColor,),
                ),
               ],
             )
+        ),
+      ),
         ),
       );
 }
