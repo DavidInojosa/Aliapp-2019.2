@@ -1,9 +1,11 @@
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-import "Home.dart";
 
+class Cliente {
+  String nome, email, fone, lastSeen;
+  Cliente(this.nome, {this.email, this.fone});
+}
 
 class BottomNavigator extends StatelessWidget {
   final int _currentIndex;
@@ -14,34 +16,45 @@ class BottomNavigator extends StatelessWidget {
         currentIndex: _currentIndex,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-              icon: Icon(Icons.school),
-              title: Text("Treinamento")
+              icon: Icon(Icons.contacts),
+            title: Text("Clientes"),
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.contacts),
-              title: Text("Clientes")
+              icon: Icon(Icons.home),
+            title: Text("Home"),
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.map),
-              title: Text("Mapeamento")
+              title: Text("Mapa"),
           ),
         ],
 
       onTap: (index) {
-        if (index == _currentIndex) {return;}
-        if (index == 1)
-          Navigator.pushNamed(context, '/clientes');
-        if (index == 2)
-          Navigator.pushNamed(context, '/mapa');
-      },
+        if (index == _currentIndex) {
+          return;
+        }
+        switch (index) {
+          case 0:
+            Navigator.pushReplacementNamed(context, '/clientes');
+            break;
+          case 1:
+            Navigator.pushReplacementNamed(context, '/');
+            break;
+          case 2:
+            Navigator.pushReplacementNamed(context, '/mapa');
+            break;
+          default:
+            break;
+        }
+      }
     );
   }
 }
 
 class Server {
-  //lembrar de emulador e pc na mesma wifi
-  static String serverUrl = "http://172.26.70.123:5000/"; // "192.168.42.176"
-  static set serverAddr(String addr) => serverUrl = "http://"+addr+":5000/";
+  // lembrar de emulador e pc na mesma wifi
+  static String serverUrl = "http://172.26.113.243:5000"; // "192.168.42.176"
+  static set serverAddr (String addr) => serverUrl = "http://"+addr+":5000";
   
   static Future<bool> testActive() async {
     try {
