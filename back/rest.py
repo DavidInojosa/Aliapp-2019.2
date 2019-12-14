@@ -1,69 +1,128 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
-from time import sleep
+import filedb as fdb
+import actiondb as adb
 
+# flask boilerplate
 app = Flask(__name__)
 api = Api(app)
 
-class HelloWorld(Resource):
-        def get(self):
-                return "Hello World"
+# aux functions
+def updateList():
+    global entryList
+    entryList = fdb.getAll()
+    for cli in entryList:
+        cli_acts = adb.getByCli(cli["uid"])
+        lasts   = list(filter(lambda x:  x["action"]!="futuro", cli_acts))
+        futures = list(filter(lambda x:( x["action"]=="futuro" and x["stamp"]>=adb.getToday() ), cli_acts))
+        cli ["last"] = lasts[0] if len(lasts) > 0 else {}
+        cli ["future"] = futures[-1] if len(futures) > 0 else {}
+    entryList.sort(key=(lambda x : x["nome"]))
 
-class Echo(Resource):
-        def get(self, param):
-                return "Oi, "+param
+# global var
+updateList()
 
-clientes_parser = reqparse.RequestParser()
-clientes_parser.add_argument('name')
+# server test frontpage
+class Teste(Resource):
+    def get(self):
+        return "Tudo certo, nada errado"
 
+# cliente parser configutarion
+clienteParser = reqparse.RequestParser()
+clienteParser.add_argument('nome', required=True, help="falta um campo com o primeiro nome")
+clienteParser.add_argument('fone')
+clienteParser.add_argument('email')
+
+# action parser configutarion
+actParser = reqparse.RequestParser()
+actParser.add_argument('act', required=True)
+actParser.add_argument('cliente', required=True)
+actParser.add_argument('stamp')
+
+# class definitions
 class ListarClientes(Resource):
-        def get(self):
-            keys = list(Clientes.clientes.keys())
-            keys.sort()
-            return [Clientes.clientes[idx]["nome"] for idx in keys]
-        def post(self):
-            args = clientes_parser.parse_args()
-                
+    def get(self):
+        return entryList
+
+    def post(self):
+        args = clienteParser.parse_args()
+        if not (args["email"] or args["fone"]):
+            return {"message": "must provide email ou telefone"}
+        uid = fdb.addEntry(**args)
+        adb.addEntry("novo", uid)
+        updateList()
+        return uid
+
+class Buscar(Resource):
+    def get(self, query):
+        start = (lambda x : query.lower() in x["nome"].lower())
+        return list(filter( start, entryList ))
+
 class Clientes(Resource):
-    clientes = {
-            1: {"nome": "Joaquim",
-                "sobrenome": "Nabuco",
-                "telefone": "96769833",
-                "notas":"notas-joaquim.txt"},
-            2: {"nome": "Romeu",
-                "sobrenome": "Ijuliette",
-                "telefone": "997478622",
-                "notas":"notas-romeu.txt"},
-            3: {"nome": "Fulano",
-                "sobrenome": "De Tal",
-                "telefone": "996748562",
-                "notas":"notas-fulano.txt"},
-            4: {"nome": "Sicrano",
-                "sobrenome": "Alcoforado",
-                "telefone": "996666969"}
-            }
+    def put(self, identifier):
+        args = clienteParser.parse_args()
+        if not (args["email"] or args["fone"]):
+            return {"message": "must provide email ou telefone"}
+        uid = fdb.editEntry(uid=identifier, **args)
+        updateList()
+        return uid
+
     def get(self, identifier):
-        sleep(2.0)
-        return self.clientes[identifier]
+        cli      = fdb.getById(identifier)
+        if cli == -1:
+            print("WARN: Tentativa de acessar cliente inexistente", identifier)
+            return {"message": "Cliente inexistente"}, 404
+        cli_acts = adb.getByCli(cli["uid"])
+        lasts   = list(filter(lambda x:  x["action"]!="futuro", cli_acts))
+        futures = list(filter(lambda x:( x["action"]=="futuro" and x["stamp"]>=adb.getToday() ), cli_acts))
+        cli ["last"] = lasts[0] if len(lasts) > 0 else {}
+        cli ["future"] = futures[-1] if len(futures) > 0 else {}
+        return cli
+        
 
-class Quiz(Resource):
-        def get(self):
-                return [
-    {'q': 'quem eh o nosso cliente?',
-           'alt': ["Clovis Henrique", "Alicerce", "Disensa", "CESAR"],
-           'c': 1},
-    {'q': 'o que o nosso cliente vende?',
-           'alt': ["casacos de couro", "materiais de escritorio", "suor, lagrimas e sangue", "materiais de construcao"],
-           'c': 3},
-    {'q': 'quem e o rei do ovo',
-           'alt': ["eu", "voce", "zooboo", "mafu"],
-           'c': 0} ]
+    def delete(self, identifier):
+        ret = fdb.deleteEntry(identifier)
+        updateList()
+        return ret
 
-api.add_resource(HelloWorld, '/')
-api.add_resource(Echo, '/<string:param>')
-api.add_resource(Clientes, '/clientes/<int:identifier>')
-api.add_resource(ListarClientes, '/clientes')
-api.add_resource(Quiz, '/quiz') 
+class ListarAcoesId(Resource):
+    def get(self, identifier):
+        return adb.getByCli(identifier)
+
+class ListarAcoesDia(Resource):
+    def get(self, data):
+        return adb.getByDay(data)
+
+class Acoes(Resource):
+    def get(self):
+        return adb.getAll()
+
+    def post(self):
+        args = actParser.parse_args()
+        ret = adb.addEntry(**args)
+        if ret > -1:
+            return {"message": "success", "uid": ret}
+        else:
+            return {"message": "failed"}
+
+class ListarMapa(Resource):
+    def get(self):
+        return [ {"nome": "alicerce",
+                         "lat": "0192931",
+                         "lon": "0120391"}, 
+                        {"nome": "cesar", 
+                         "lat": "203123", 
+                         "lon": "1293-0"} ]
+
+# routes/resources
+api.add_resource(Teste, '/')
+api.add_resource(ListarClientes, '/cliente', '/cliente/')
+api.add_resource(Clientes, '/cliente/<int:identifier>')
+api.add_resource(Buscar, '/cliente/<string:query>')
+api.add_resource(Acoes, '/act')
+api.add_resource(ListarAcoesId, '/act/byId/<int:identifier>')
+api.add_resource(ListarAcoesDia, '/act/byDay/<string:data>')
+api.add_resource(ListarMapa, '/maps')
 
 if __name__ == "__main__":
         app.run(host='0.0.0.0', debug=True)
